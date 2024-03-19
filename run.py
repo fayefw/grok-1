@@ -52,7 +52,7 @@ def main():
         runner=ModelRunner(
             model=grok_1_model, # grok模型
             bs_per_device=0.125,
-            checkpoint_path=CKPT_PATH,
+            checkpoint_path=CKPT_PATH, # 权重路径
         ),
         name="local",
         load=CKPT_PATH,
@@ -63,8 +63,8 @@ def main():
     inference_runner.initialize()
     gen = inference_runner.run()
 
-    inp = "The answer to life the universe and everything is of course"
-    print(f"Output for prompt: {inp}", sample_from_model(gen, inp, max_len=100, temperature=0.01))
+    inp = "The answer to life the universe and everything is of course" # prompt输入 
+    print(f"Output for prompt: {inp}", sample_from_model(gen, inp, max_len=100, temperature=0.01)) # 打印模型输出
 
 
 if __name__ == "__main__":
