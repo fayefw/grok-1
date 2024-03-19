@@ -22,42 +22,42 @@ CKPT_PATH = "./checkpoints/"
 
 
 def main():
-    grok_1_model = LanguageModelConfig(
-        vocab_size=128 * 1024,
-        pad_token=0,
-        eos_token=2,
-        sequence_len=8192,
+    grok_1_model = LanguageModelConfig( 
+        vocab_size=128 * 1024, # 词表大小
+        pad_token=0,  # 填充词元
+        eos_token=2, # 结束词元
+        sequence_len=8192, # 序列大小
         embedding_init_scale=1.0,
         output_multiplier_scale=0.5773502691896257,
         embedding_multiplier_scale=78.38367176906169,
         model=TransformerConfig(
-            emb_size=48 * 128,
-            widening_factor=8,
-            key_size=128,
-            num_q_heads=48,
-            num_kv_heads=8,
-            num_layers=64,
+            emb_size=48 * 128, # 嵌入大小
+            widening_factor=8, # 宽度因子
+            key_size=128, # 键大小
+            num_q_heads=48, #查询头数量
+            num_kv_heads=8, #键值头数量
+            num_layers=64, # 层数
             attn_output_multiplier=0.08838834764831845,
-            shard_activations=True,
+            shard_activations=True, # 是否分片激活
             # MoE.
-            num_experts=8,
-            num_selected_experts=2,
+            num_experts=8, # 专家数量
+            num_selected_experts=2, # 选择的专家数量
             # Activation sharding.
             data_axis="data",
             model_axis="model",
         ),
     )
     inference_runner = InferenceRunner(
-        pad_sizes=(1024,),
+        pad_sizes=(1024,), # 填充大小
         runner=ModelRunner(
-            model=grok_1_model,
+            model=grok_1_model, # grok模型
             bs_per_device=0.125,
             checkpoint_path=CKPT_PATH,
         ),
         name="local",
         load=CKPT_PATH,
-        tokenizer_path="./tokenizer.model",
-        local_mesh_config=(1, 8),
+        tokenizer_path="./tokenizer.model", # 词元分析模型
+        local_mesh_config=(1, 8), # 需要8个GPU
         between_hosts_config=(1, 1),
     )
     inference_runner.initialize()
