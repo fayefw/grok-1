@@ -773,8 +773,8 @@ class MultiHeadAttention(hk.Module):
         assert self.num_q_heads % self.num_kv_heads == 0
         query_heads = projection(
             query,
-            self.key_size,
-            self.num_q_heads,
+            self.key_size, # 128
+            self.num_q_heads, # 48
             name="query",
             sharding=P("data", "model"),
             mesh=mesh,
@@ -783,16 +783,16 @@ class MultiHeadAttention(hk.Module):
         new_memory = None
         key_heads = projection(
             key,
-            self.key_size,
-            self.num_kv_heads,
+            self.key_size, # 128
+            self.num_kv_heads, # 8
             name="key",
             sharding=P("data", "model"),
             mesh=mesh,
         )  # [B, T, H, K]
         value_heads = projection(
             value,
-            self.value_size,
-            self.num_kv_heads,
+            self.value_size, # 128
+            self.num_kv_heads, # 8
             name="value",
             sharding=P("data", "model"),
             mesh=mesh,
@@ -1046,9 +1046,9 @@ class DecoderLayer(hk.Module):
         h = with_sharding_constraint(inputs, sharding)
 
         attn_output = MHABlock(
-            num_q_heads=self.num_q_heads,
-            num_kv_heads=self.num_kv_heads,
-            key_size=self.key_size,
+            num_q_heads=self.num_q_heads, # 48
+            num_kv_heads=self.num_kv_heads, # 8
+            key_size=self.key_size, # 128
             attn_output_multiplier=self.attn_output_multiplier,
             mesh=self.mesh,
             data_axis=self.data_axis,
@@ -1377,7 +1377,7 @@ class Transformer(hk.Module):
                 memory,
             )
 
-        for i in range(self.num_layers):
+        for i in range(self.num_layers): # 64
             decoder_output = block(
                 h,
                 mask,
