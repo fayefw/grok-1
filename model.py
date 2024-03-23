@@ -1053,11 +1053,11 @@ class DecoderLayer(hk.Module):
             mesh=self.mesh,
             data_axis=self.data_axis,
             model_axis=self.model_axis,
-        )(layer_norm(h), mask, layer_memory)
-        h_attn = attn_output.embeddings
+        )(layer_norm(h), mask, layer_memory) # 层归一化后输入多头注意力
+        h_attn = attn_output.embeddings # 多头注意力
 
-        h_attn = layer_norm(h_attn)
-        h += h_attn
+        h_attn = layer_norm(h_attn) # 层归一化
+        h += h_attn  # 残差连接
         h = with_sharding_constraint(h, sharding)
 
         def base_dense_block(h):
@@ -1071,7 +1071,7 @@ class DecoderLayer(hk.Module):
             )(h)
             return h
 
-        if self.num_experts > 1:
+        if self.num_experts > 1: # 专家数>1
             rank_logger.debug("Using MoE!")
             router = Router(
                 num_selected_experts=self.num_selected_experts,
@@ -1083,17 +1083,17 @@ class DecoderLayer(hk.Module):
             h_dense = MoELayer(
                 num_experts=self.num_experts,
                 mesh=self.mesh,
-                layer_fn=base_dense_block,
-                router=router,
+                layer_fn=base_dense_block, # 密集层
+                router=router, # 路由器
                 shard_activations=self.shard_activations,
                 data_axis=self.data_axis,
                 model_axis=self.model_axis,
-            )(layer_norm(h), padding_mask)
+            )(layer_norm(h), padding_mask) # 层归一化后输入混合专家层
         else:
             h_dense = base_dense_block(layer_norm(h))
 
-        h_dense = layer_norm(h_dense)
-        h += h_dense
+        h_dense = layer_norm(h_dense) # 层归一化
+        h += h_dense # 残差连接
         h = with_sharding_constraint(h, sharding)
 
         return DecoderOutput(
