@@ -1224,7 +1224,7 @@ class LanguageModel(hk.Module):
 
         input_mask = jnp.greater(tokens, config.pad_token)
 
-        # Embed the input tokens and positions.
+        # Embed the input tokens and positions. 嵌入输入词元和位置
         in_out_embed = InOutEmbed(
             self.config.vocab_size,
             embed_dim=self.config.model_size,
@@ -1262,7 +1262,7 @@ class LanguageModel(hk.Module):
             embeddings = jax.vmap(lambda x, i: x[i], in_axes=0, out_axes=0)(embeddings, last_step)
             embeddings = jnp.expand_dims(embeddings, axis=1)
 
-        # Decode the embeddings (here, we use tied weights).
+        # Decode the embeddings (here, we use tied weights). 解码嵌入表示（这里用了绑定权重/参数共享）
         rank_logger.info(embeddings.shape)
         out = in_out_embed.decode(embeddings)
         rank_logger.info(out.shape)
@@ -1329,8 +1329,8 @@ class Transformer(hk.Module):
         mask: jax.Array,  # [B, T]
         memory: Optional[Memory],
     ) -> TransformerOutput:
-        """Transforms input embedding sequences to output embedding sequences."""
-
+        """Transforms input embedding sequences to output embedding sequences.
+        将输入嵌入序列转换为输出嵌入序列。 """
         fprop_dtype = embeddings.dtype
         _, seq_len, model_size = embeddings.shape
         padding_mask = mask.copy()
